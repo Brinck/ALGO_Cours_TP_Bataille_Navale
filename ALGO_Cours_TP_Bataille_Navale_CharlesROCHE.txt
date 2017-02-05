@@ -1,0 +1,153 @@
+//Programme : bataille navale
+//BUT : afficher un jeu de bataille navale jouable par une personne contre l'ordinateur:
+//-	Écrire le type enregistrement « cases » composé de deux champs : lignes et colonnes des entiers 
+//-	Écrire le type enregistrement bateau composé d’un ensemble N de cases 
+//-	Écrire l’enregistrement flotte composé d’un ensemble de bateaux (en constante la taille)
+//-	Ecrire une fonction de création d’une case elle prend en paramètre la ligne et la colonne associées à la case. 
+//-	Ecrire une fonction de comparaison de deux cases, celle-ci renverra vrai ou faux 
+//-	Ecrire une fonction de création de bateau, elle reverra une structure bateau correctement remplie 
+//-	Ecrire une fonction qui vérifie qui vérifie qu’une case appartient à un bateau, cette fonction renverra vrai ou faux selon le cas. Attention, cette fonction de vérification devra utiliser votre fonction de comparaison de cases.
+//-	Ecrire une fonction qui vérifie qu’une case appartient à une flotte de bateaux. Attention, cette fonction devra utiliser votre fonction de vérification pour un bateau.
+//-	Ecrire la bataille navale complète
+//ENTREE: la ligne et la colonne de la case que le joueur cible
+//SORTIE : le plateau de jeu, un "X" si la case touchée n'était pas un bateau ou "O" si c'en était un
+
+CONST
+        vide=" " //Définition d'un vide en constante
+        Max=11 //Taille maximum du plateau
+
+        MaxTailleBat=5//Taille Maximum d'un bateau
+        MaxTailleFlotte=5 //Taille maximum d'une flotte
+
+//Les cases ont des coordonnées de lignes et de colonnes
+Type
+        Cells=Enregistrement
+                Ligne,Colonne:ENTIER
+        FinEnregistrement
+
+//Les bateaux sont composés d'un ensemble de cases
+Type
+        Bateau=Enregistrement
+                TabBat:Tableau [1..MaxTailleBat] de Cells //Tableau de cases d'un bateau
+        FinEnregistrement
+
+//La flotte est composée d'un ensemble de bateaux
+Type
+        Flotte=record
+                TabFlotte:Array[1..MaxTailleFlotte] de Bateau //Tableau de bateaux
+        FinEnregistrement
+
+PROCEDURE InitPlat (i,j:ENTIER)//Initialisation du plateau vierge
+        VAR
+                DebLigne, DebColonne:ENTIER //Chiffres et lettres de début de ligne et colonne
+
+        DEBUT
+        //Initialisation des variables
+        DebColonne<-1
+        DebLigne<-ord("A")
+
+        //Creation et affichage du plateau
+        POUR i DE 1 A Max FAIRE
+                POUR j DE 1 A Max FAIRE
+                        SI (i=1) ET (j=1) ALORS //Affichage du vide en haut à gauche du plateau
+                                ECRIRE(vide)
+                        SINON
+                                SI (i<>1) ET (j=1) ALORS //Affichage à partir de A jusqu'à J
+                                        ECRIRE(chr(DebLigne))
+                                        DebLigne<-DebLigne+1
+                                SINON
+                                        SI (i=1) ET (j<>1) ALORS //Affichage à partir de 1 jusqu'à 10
+                                                ECRIRE(DebColonne)
+                                                DebColonne<-DebColonne+1
+                                        SINON  //Affichage des points
+                                                ECRIRE(".")
+                   						FinSi
+                                FinSi
+                       	FinSi
+                FinPour
+        FinPour
+        FinProcedure
+
+PROCEDURE InitBat (var PorteAvion,Croiseur,SousMarin1,SousMarin2,Torpilleur:Bateau; i:ENTIER) //Initialisation des valeurs dans les tableaux des bateaux
+        DEBUT
+        POUR i DE 1 A MaxTailleBat FAIRE
+                //Porte-Avion
+                PorteAvion.TabBat[i].Ligne<-0
+                PorteAvion.TabBat[i].Colonne<-0
+
+                //Croiseur
+                Croiseur.TabBat[i].Ligne<-0
+                Croiseur.TabBat[i].Colonne<-0
+
+                //Sous-marin 1
+                SousMarin1.TabBat[i].Ligne<-0
+                SousMarin1.TabBat[i].Colonne<-0
+
+                //Sous-Marin 2
+                SousMarin2.TabBat[i].Ligne<-0
+                SousMarin2.TabBat[i].Colonne<-0
+
+                //Torpilleur
+                Torpilleur.TabBat[i].Ligne<-0
+                Torpilleur.TabBat[i].Colonne<-0
+        FinPour
+        FinProcedure
+
+PROCEDURE InitFlotte (var FlotteOrdi:Flotte; var PorteAvion,Croiseur,SousMarin1,SousMarin2,Torpilleur:Bateau; i:ENTIER) //Création du tableau de flotte
+       	DEBUT
+        FlotteOrdi.TabFlotte[1]<-PorteAvion
+        FlotteOrdi.TabFlotte[2]<-Croiseur
+        FlotteOrdi.TabFlotte[3]<-SousMarin1
+        FlotteOrdi.TabFlotte[4]<-SousMarin2
+        FlotteOrdi.TabFlotte[5]<-Torpilleur
+        FinProcedure
+
+PROCEDURE ChoixJoueur (var ChoixLigne:ENTIER; var ChoixColonne:CARACTERE) //Choix de la cible du joueur
+        DEBUT
+        //Choix du num‚ro de ligne
+        GotoXY(1,14)
+        ECRIRE("Veuillez entrer le numero de la ligne de votre cible : ")
+        LIRE(ChoixLigne)
+
+        //Choix de la lettre de colonne
+        GotoXY(1,15)
+        ECRIRE("Veuillez entrer la lettre de la colonne de votre cible : ")
+        LIRE(ChoixColonne)
+        FinProcedure
+
+FONCTION VerifCell (var Case1,Case2:Cells; VerifCase,VerifLigne,VerifColonne:BOOLEEN):BOOLEEN //Comparaison de deux cases
+        DEBUT
+        VerifLigne<-Case1.Ligne=Case2.Ligne//Vérifie si la ligne des deux cases est la même
+        VerifColonne<-Case1.Colonne=Case2.Colonne//Vérifie si la colonne des deux cases est la même
+
+        //Condition permettant de savoir si les deux cases sont identiques ou non
+        SI VerifLigne=VRAI ET VerifColonne=VRAI ALORS
+                VerifCase<-VRAI
+        SINON
+                VerifCase<-FAUX
+        FinSi
+
+//Programme principal
+VAR
+        DebLigne,DebColonne:ENTIER //DebLigne correspond au lettres de A à J et DebColonne aux chiffres de 1 à 10
+        i,j:ENTIER //Coordonnées d'affichage du plateau vierge
+        PorteAvion,Croiseur,SousMarin1,SousMarin2,Torpilleur:Bateau //Tous les tableaux de bateaux
+        FlotteOrdi:Flotte //Tableau de la flotte de l'ordinateur
+        ChoixLigne:ENTIER //Choix du numéro de ligne par le joueur
+        ChoixColonne:ENTIER //Choix de la lettre de colonne par le joueur
+
+DEBUT
+        ECRIRE("Programme : Bataille navale")
+
+        //Initialisation des valeurs dans les tableaux des bateaux
+        InitBat(PorteAvion,Croiseur,SousMarin1,SousMarin2,Torpilleur,i)
+
+        //Initialisation de la flotte de l'ordinateur
+        InitFlotte(FlotteOrdi,PorteAvion,Croiseur,SousMarin1,SousMarin2,Torpilleur,i)
+
+        //Initialisation du plateau
+        InitPlat(i,j)
+
+        //Choix de la cible du joueur
+        CHoixJoueur(ChoixLigne,ChoixColonne)
+FIN
